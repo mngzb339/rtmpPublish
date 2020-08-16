@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.luban.publisher"
-        minSdkVersion 19
+        minSdkVersion 17
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -15,7 +15,12 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags ""
+                abiFilters 'armeabi-v7a'
             }
+        }
+        ndk {
+            //选择要添加的对应cpu类型的.so库。
+            abiFilters 'armeabi-v7a'
         }
     }
 
