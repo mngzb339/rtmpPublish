@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.view.SurfaceView;
+import android.view.View;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
@@ -23,9 +24,16 @@ public class MainActivity extends AppCompatActivity {
         livePusher.setPreviewDisplay(surfaceView.getHolder());
     }
 
-    /**
-     * A native method that is implemented by the 'native-lib' native library,
-     * which is packaged with this application.
-     */
-    public native String stringFromJNI();
+
+    public void switchCamera(View view) {
+        livePusher.switchCamera();
+    }
+
+    public void startLive(View view) {
+        livePusher.startLive("rtmp://172.16.132.128/myapp/mystream");
+    }
+
+    public void stopLive(View view) {
+        livePusher.stopLive();
+    }
 }
