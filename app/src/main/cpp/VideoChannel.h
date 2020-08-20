@@ -11,6 +11,7 @@
 #include "librtmp/rtmp.h"
 
 class VideoChannel {
+    typedef void (*VideoCallback)(RTMPPacket* packet);
 
 public:
 
@@ -19,7 +20,9 @@ public:
     ~VideoChannel();
 
     void setVideoEncInfo(int width, int height, int fps, int bitrate);
+    void encodeData(int8_t *data);
 
+    void setVideoCallback(VideoCallback callback);
 
 private:
     //互斥锁
@@ -32,8 +35,16 @@ private:
     int mFps;
 
     int mHeigth;
+    x264_picture_t *pic_in = 0;
+    int ySize;
+    int uvSize;
+    int index = 0;
 
-    x264_t * videoCodec;
+    x264_t * videoCodec=0;
+    VideoCallback callback;
+    void sendSpsPps(uint8_t *sps, uint8_t *pps, int len, int pps_len);
+
+    void sendFrame(int type, int payload, uint8_t *p_payload);
 };
 
 

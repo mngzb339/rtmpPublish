@@ -6,24 +6,34 @@
 #include "macro.h"
 #include "VideoChannel.h"
 
-SafeQueue<RTMPPacket *> packet;
+SafeQueue<RTMPPacket *> packets;
 VideoChannel *videoChannel = 0;
 int isStart = 0;
 pthread_t pid;
+uint32_t start_time;
 
 // 指针的引用
 void releasePackets(RTMPPacket *&packet) {
     if (packet) {
-        DELETE(packet)
+        RTMPPacket_Free(packet);
+        delete packet;
+        packet = 0;
+    }
+
+}
+void callback(RTMPPacket *packet) {
+    if (packet) {
+        packet->m_nTimeStamp = RTMP_GetTime() - start_time;
+        packets.push(packet);
     }
 }
-
 void *start(void *args) {
+    LOGE("rtmp creat faild");
+
     char *url = static_cast<char *>(args);
     do {
         RTMP *rtmp = RTMP_Alloc();
         if (rtmp) {
-            LOGE("rtmp creat faild");
             break;
         }
         RTMP_Init(rtmp);
@@ -49,9 +59,12 @@ JNIEXPORT void JNICALL
 Java_com_luban_publisher_LivePusher_native_1init(JNIEnv *env, jobject thiz) {
     // 准备一个工具类辅助编码
     // 准备一个队列 将打包好的数据数据放入队列
-    videoChannel = new VideoChannel;
+    LOGE("rtmp creat faild 62");
 
-    packet.setReleaseCallback(releasePackets);
+    videoChannel = new VideoChannel;
+    videoChannel->setVideoCallback(callback);
+    packets.setReleaseCallback(releasePackets);
+
 }
 extern "C"
 JNIEXPORT void JNICALL
@@ -59,6 +72,7 @@ Java_com_luban_publisher_LivePusher_native_1start(JNIEnv *env, jobject thiz, jst
     if (isStart) {
         return;
     }
+
     const char *path = env->GetStringUTFChars(path_, 0);
     char *url = new char[strlen(path) + 1];
     strcpy(url, path);
@@ -86,6 +100,14 @@ Java_com_luban_publisher_LivePusher_native_1setVideoEncInfo(JNIEnv *env, jobject
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_luban_publisher_LivePusher_native_1pushVideo(JNIEnv *env, jobject thiz, jbyteArray data) {
+
+//    if (!videoChannel || !readyPushing) {
+//        return;
+//    }
+//    jbyte *data = env->GetByteArrayElements(data_, NULL);
+//    videoChannel->encodeData(data);
+//    env->ReleaseByteArrayElements(data_, data, 0);
+
 }
 extern "C"
 JNIEXPORT void JNICALL

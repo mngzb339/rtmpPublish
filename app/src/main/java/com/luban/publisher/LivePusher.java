@@ -1,6 +1,7 @@
 package com.luban.publisher;
 
 import android.app.Activity;
+import android.util.Log;
 import android.view.SurfaceHolder;
 
 import com.luban.publisher.channel.AudioChannel;
@@ -20,8 +21,12 @@ public class LivePusher {
     public LivePusher(Activity activity, int width, int height, int bitrate,
                       int fps, int cameraId) {
         native_init();
+        Log.i("rtmp creat faild","12");
+
         videoChannel = new VideoChannel(this,activity, width, height, bitrate, fps, cameraId);
         audioChannel = new AudioChannel();
+        Log.i("rtmp creat faild","12");
+
     }
 
     public void setPreviewDisplay(SurfaceHolder surfaceHolder) {
