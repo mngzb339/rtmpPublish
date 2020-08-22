@@ -39,7 +39,7 @@ void *start(void *args) {
         }
         RTMP_Init(rtmp);
         //设置超时时间 5s
-       // rtmp->Link.timeout = 5;
+        rtmp->Link.timeout = 5;
         int ret = RTMP_SetupURL(rtmp, url);
         if (!ret) {
             LOGE("rtmp设置地址失败:%s", url);
@@ -87,6 +87,10 @@ void *start(void *args) {
         releasePackets(packet);
 
     } while (0);
+    isStart = 0;
+    readyPushing = 0;
+    packets.setWork(0);
+    packets.clear();
     if (rtmp) {
         RTMP_Close(rtmp);
         RTMP_Free(rtmp);
@@ -153,8 +157,12 @@ Java_com_luban_publisher_LivePusher_native_1pushVideo(JNIEnv *env, jobject thiz,
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_luban_publisher_LivePusher_native_1stop(JNIEnv *env, jobject thiz) {
+    readyPushing = 0;
+    pthread_join(pid, 0);
 }
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_luban_publisher_LivePusher_native_1release(JNIEnv *env, jobject thiz) {
+    DELETE(videoChannel);
+
 }
