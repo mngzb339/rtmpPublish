@@ -22,6 +22,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
         <Button
+            android:id="@+id/living"
             android:text="开始直播"
             android:onClick="startLive"
             android:layout_width="wrap_content"

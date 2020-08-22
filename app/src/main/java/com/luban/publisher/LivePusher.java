@@ -21,11 +21,8 @@ public class LivePusher {
     public LivePusher(Activity activity, int width, int height, int bitrate,
                       int fps, int cameraId) {
         native_init();
-        Log.i("rtmp creat faild","12");
-
         videoChannel = new VideoChannel(this,activity, width, height, bitrate, fps, cameraId);
         audioChannel = new AudioChannel();
-        Log.i("rtmp creat faild","12");
 
     }
 
@@ -38,6 +35,7 @@ public class LivePusher {
     }
 
     public void startLive(String path) {
+
         native_start(path);
         videoChannel.startLive();
         audioChannel.startLive();

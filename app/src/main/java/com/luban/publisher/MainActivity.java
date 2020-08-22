@@ -23,6 +23,15 @@ public class MainActivity extends AppCompatActivity {
         //  设置摄像头预览的界面
 
         livePusher.setPreviewDisplay(surfaceView.getHolder());
+        findViewById(R.id.living).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i("rtmp", "onClick: ");
+                // fuck 虚拟机共享网络 坑了 半天 连不上
+              livePusher.startLive("rtmp://192.168.1.103/myapp/mystream");
+
+            }
+        });
     }
 
 
@@ -31,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startLive(View view) {
-        livePusher.startLive("rtmp://172.16.132.128/myapp/mystream");
     }
 
     public void stopLive(View view) {

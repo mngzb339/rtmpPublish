@@ -11,7 +11,7 @@ VideoChannel *videoChannel = 0;
 int isStart = 0;
 pthread_t pid;
 uint32_t start_time;
-
+int readyPushing = 0;
 // 指针的引用
 void releasePackets(RTMPPacket *&packet) {
     if (packet) {
@@ -28,28 +28,69 @@ void callback(RTMPPacket *packet) {
     }
 }
 void *start(void *args) {
-    LOGE("rtmp creat faild");
 
     char *url = static_cast<char *>(args);
+    RTMP *rtmp = 0;
     do {
-        RTMP *rtmp = RTMP_Alloc();
-        if (rtmp) {
+        rtmp = RTMP_Alloc();
+        if (!rtmp) {
+            LOGE("rtmp创建失败38");
             break;
         }
         RTMP_Init(rtmp);
-        // 设置超时时间
-        rtmp->Link.timeout = 5;
-
+        //设置超时时间 5s
+       // rtmp->Link.timeout = 5;
         int ret = RTMP_SetupURL(rtmp, url);
         if (!ret) {
-            LOGE("设置地址失败");
+            LOGE("rtmp设置地址失败:%s", url);
             break;
         }
         //开启输出模式
         RTMP_EnableWrite(rtmp);
-        ret =  RTMP_Connect(rtmp, 0);
-    } while (0);
+        ret = RTMP_Connect(rtmp, 0);
+        if (!ret) {
+            LOGE("rtmp开启输出模式连接地址失败:%s", url);
+            break;
+        }
+        ret = RTMP_ConnectStream(rtmp, 0);
+        if (!ret) {
+            LOGE("rtmp56连接流失败:%s", url);
+            break;
+        }
+        LOGE("rtmp56连接流失败:%s", "我已经链接上啦");
 
+        //准备好了 可以开始推流了
+        readyPushing = 1;
+        //记录一个开始推流的时间
+        start_time = RTMP_GetTime();
+        packets.setWork(1);
+        RTMPPacket *packet = 0;
+        //循环从队列取包 然后发送
+        while (isStart) {
+            packets.pop(packet);
+            if (!isStart) {
+                break;
+            }
+            if (!packet) {
+                continue;
+            }
+            // 给rtmp的流id
+            packet->m_nInfoField2 = rtmp->m_stream_id;
+            //发送包 1:加入队列发送
+            ret = RTMP_SendPacket(rtmp, packet, 1);
+            releasePackets(packet);
+            if (!ret) {
+                LOGE("发送数据失败");
+                break;
+            }
+        }
+        releasePackets(packet);
+
+    } while (0);
+    if (rtmp) {
+        RTMP_Close(rtmp);
+        RTMP_Free(rtmp);
+    }
     delete url;
     return 0;
 }
@@ -59,7 +100,6 @@ JNIEXPORT void JNICALL
 Java_com_luban_publisher_LivePusher_native_1init(JNIEnv *env, jobject thiz) {
     // 准备一个工具类辅助编码
     // 准备一个队列 将打包好的数据数据放入队列
-    LOGE("rtmp creat faild 62");
 
     videoChannel = new VideoChannel;
     videoChannel->setVideoCallback(callback);
@@ -69,6 +109,7 @@ Java_com_luban_publisher_LivePusher_native_1init(JNIEnv *env, jobject thiz) {
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_luban_publisher_LivePusher_native_1start(JNIEnv *env, jobject thiz, jstring path_) {
+
     if (isStart) {
         return;
     }
@@ -99,14 +140,14 @@ Java_com_luban_publisher_LivePusher_native_1setVideoEncInfo(JNIEnv *env, jobject
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_luban_publisher_LivePusher_native_1pushVideo(JNIEnv *env, jobject thiz, jbyteArray data) {
+Java_com_luban_publisher_LivePusher_native_1pushVideo(JNIEnv *env, jobject thiz, jbyteArray data_) {
 
-//    if (!videoChannel || !readyPushing) {
-//        return;
-//    }
-//    jbyte *data = env->GetByteArrayElements(data_, NULL);
-//    videoChannel->encodeData(data);
-//    env->ReleaseByteArrayElements(data_, data, 0);
+    if (!videoChannel || !readyPushing) {
+        return;
+    }
+    jbyte *data = env->GetByteArrayElements(data_, NULL);
+    videoChannel->encodeData(data);
+    env->ReleaseByteArrayElements(data_, data, 0);
 
 }
 extern "C"

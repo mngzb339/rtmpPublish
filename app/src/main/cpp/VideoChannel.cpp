@@ -32,16 +32,13 @@ void VideoChannel::setVideoEncInfo(int width, int height, int fps, int bitrate) 
     mHeigth = height;
     mFps = fps;
     mBitrate = bitrate;
-    LOGE("rtmp creat faild 36");
 
     ySize = width * height;
     uvSize = ySize / 4;
     if(videoCodec){
-        LOGE("rtmp creat faild 40");
 
         x264_encoder_close(videoCodec);
         videoCodec = 0;
-        LOGE("rtmp creat faild 44");
 
     }
     if (pic_in) {
@@ -49,7 +46,6 @@ void VideoChannel::setVideoEncInfo(int width, int height, int fps, int bitrate) 
         delete pic_in;
         pic_in = 0;
     }
-    LOGE("rtmp creat faild 45");
 
     //打开x264 编码器
     //x264编码器属性
@@ -72,7 +68,6 @@ void VideoChannel::setVideoEncInfo(int width, int height, int fps, int bitrate) 
     param.rc.i_vbv_max_bitrate = bitrate / 1000 * 1.2;
     //设置了i_vbv_max_bitrate必须设置此参数，码率控制区大小,单位kbps
     param.rc.i_vbv_buffer_size = bitrate / 1000;
-    LOGE("rtmp creat faild 68");
 
     //帧率
     param.i_fps_num = fps;
@@ -88,7 +83,6 @@ void VideoChannel::setVideoEncInfo(int width, int height, int fps, int bitrate) 
     param.b_repeat_headers = 1;
     //多线程
     param.i_threads = 1;
-    LOGE("rtmp creat faild 84");
 
     x264_param_apply_profile(&param, "baseline");
     //打开编码器
