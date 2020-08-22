@@ -22,7 +22,7 @@ public class LivePusher {
                       int fps, int cameraId) {
         native_init();
         videoChannel = new VideoChannel(this,activity, width, height, bitrate, fps, cameraId);
-        audioChannel = new AudioChannel();
+        audioChannel = new AudioChannel(this);
 
     }
 
@@ -53,6 +53,9 @@ public class LivePusher {
     public native void native_start(String path);
 
     public native void native_setVideoEncInfo(int width, int height, int fps, int bitrate);
+
+    public native void native_setAudioEncInfo(int sampleRateInHz, int channelConfig);
+
 
     public native void native_pushVideo(byte[] data);
 

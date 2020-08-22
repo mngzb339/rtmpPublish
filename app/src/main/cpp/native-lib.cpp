@@ -5,9 +5,12 @@
 #include "safe_queue.h"
 #include "macro.h"
 #include "VideoChannel.h"
+#include "AudioChannl.h"
 
 SafeQueue<RTMPPacket *> packets;
 VideoChannel *videoChannel = 0;
+AudioChannel *audioChannel = 0;
+
 int isStart = 0;
 pthread_t pid;
 uint32_t start_time;
@@ -108,6 +111,10 @@ Java_com_luban_publisher_LivePusher_native_1init(JNIEnv *env, jobject thiz) {
     videoChannel = new VideoChannel;
     videoChannel->setVideoCallback(callback);
     packets.setReleaseCallback(releasePackets);
+    // 音频率
+    audioChannel = new AudioChannel;
+    audioChannel->setAudioCallback(callback);
+
 
 }
 extern "C"
@@ -164,5 +171,18 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_luban_publisher_LivePusher_native_1release(JNIEnv *env, jobject thiz) {
     DELETE(videoChannel);
+    DELETE(audioChannel);
+
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_luban_publisher_LivePusher_native_1setAudioEncInfo(JNIEnv *env, jobject thiz,
+                                                            jint sampleRateInHz,
+                                                            jint channelConfig) {
+
+    if (audioChannel) {
+        audioChannel->setAudioEncInfo(sampleRateInHz,channelConfig);
+    }
 
 }

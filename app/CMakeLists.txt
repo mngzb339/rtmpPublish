@@ -21,4 +21,5 @@ target_link_libraries(
         native-lib
         rtmp
         x264
+        faac
         log)
