@@ -3,6 +3,7 @@
 //
 #include "faac.h"
 #include <sys/types.h>
+#include "librtmp/rtmp.h"
 
 #ifndef PUBLISHER_AUDIOCHANNL_H
 #define PUBLISHER_AUDIOCHANNL_H
@@ -10,8 +11,6 @@
 
 class AudioChannel {
     typedef void (*AudioCallback)(RTMPPacket *packet);
-
-
 public:
     AudioChannel();
 
@@ -21,16 +20,21 @@ public:
 
     void setAudioCallback(AudioCallback callback);
 
+    int getInputSample();
+
+    void encodeData(int8_t *data);
+
+    RTMPPacket *getAudioTag();
+
     unsigned long  inputSamples;
     unsigned long  maxOutputBytes;
 
+    unsigned char*   buffer;
     faacEncHandle audioCodec=0;
 
-    AudioCallback callback;
+    AudioCallback callback=0;
 
     int mChannel;
-
-
 
 };
 

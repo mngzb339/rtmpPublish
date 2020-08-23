@@ -59,7 +59,12 @@ public class LivePusher {
 
     public native void native_pushVideo(byte[] data);
 
+    public native void native_pushAudio(byte[] data);
+
     public native void native_stop();
 
     public native void native_release();
+
+    public native int native_getInputSamples();
+
 }

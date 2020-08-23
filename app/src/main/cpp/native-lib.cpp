@@ -67,11 +67,12 @@ void *start(void *args) {
         //记录一个开始推流的时间
         start_time = RTMP_GetTime();
         packets.setWork(1);
+        callback(audioChannel->getAudioTag());
         RTMPPacket *packet = 0;
         //循环从队列取包 然后发送
-        while (isStart) {
+        while (readyPushing) {
             packets.pop(packet);
-            if (!isStart) {
+            if (!readyPushing) {
                 break;
             }
             if (!packet) {
@@ -166,6 +167,8 @@ JNIEXPORT void JNICALL
 Java_com_luban_publisher_LivePusher_native_1stop(JNIEnv *env, jobject thiz) {
     readyPushing = 0;
     pthread_join(pid, 0);
+    pthread_join(pid, 0);
+
 }
 extern "C"
 JNIEXPORT void JNICALL
@@ -185,4 +188,24 @@ Java_com_luban_publisher_LivePusher_native_1setAudioEncInfo(JNIEnv *env, jobject
         audioChannel->setAudioEncInfo(sampleRateInHz,channelConfig);
     }
 
+}extern "C"
+JNIEXPORT jint JNICALL
+Java_com_luban_publisher_LivePusher_native_1getInputSamples(JNIEnv *env, jobject thiz) {
+
+    if (audioChannel) {
+       return  audioChannel->getInputSample();
+    }
+    return -1;
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_luban_publisher_LivePusher_native_1pushAudio(JNIEnv *env, jobject thiz, jbyteArray data_) {
+
+    if (!audioChannel || !readyPushing) {
+        return;
+    }
+    jbyte *data = env->GetByteArrayElements(data_, NULL);
+    audioChannel->encodeData(data);
+    env->ReleaseByteArrayElements(data_, data, 0);
 }
